@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待辦事項清單</title>
+    <link rel="stylesheet" href="list.css"> <!-- 將這行添加到你的 HTML 檔案中 -->
+</head>
+
+<body onload="firstModel()"> <!-- 在 body 標籤中添加 onload 事件 -->
+    <div id="todoList">
+        <div class="task-container">
+            <h1>待辦事項清單</h1>
+            <div id="tasks"></div>
+        </div>
+
+        <!-- 將按鈕放在一個固定定位的容器中 -->
+        <div class="fixed-buttons-container">
+            <div class="buttons-container">
+                <button onclick="firstModel()">首頁</button>
+                <button onclick="filterTasks()">搜尋</button>
+                <button onclick="displayPreview()">預覽</button>
+                <button onclick="displayAddTaskModal()">新增事項</button>
+                <button onclick="modifyTask()">修改事項</button>
+                <button onclick="deleteTask()">刪除事項</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 首頁的模式 -->
+    <div id="firstModel">
+        <ul id="firstList"></ul>
+    </div>
+
+    <!-- 在這裡插入圖片 -->
+    <img id="homepageImage" src="1.jpeg" alt="首頁圖片"
+        style="width: 100%; max-width: 800px; margin-top: 20px;display: none">
+
+    <script>
+        function firstModel() {
+            // 關閉其他模態
+            document.getElementById('filterCriteria').style.display = 'none';
+            document.getElementById('addTaskModal').style.display = 'none';
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('modifyTask').style.display = 'none';
+            document.getElementById('deleteTask').style.display = 'none';
+            document.getElementById('tasks').innerHTML = '';
+
+            // 獲取圖片元素並顯示
+            var homepageImage = document.getElementById('homepageImage');
+            homepageImage.style.display = 'block';
+        }
+
+    </script>
+
+
+
+    <!-- 搜尋的模式 -->
+    <div id="filterCriteria" style="display: none;">
+        <label for="filterTitle">名稱關鍵字:</label>
+        <input type="text" id="filterTitle" placeholder="輸入名稱關鍵字...">
+
+        <label for="filterPriority">優先級:</label>
+        <select id="filterPriority">
+            <option value="一般">一般</option>
+            <option value="中等">中等</option>
+            <option value="緊急">緊急</option>
+        </select>
+
+        <label for="filterDeadline">截止日期:</label>
+        <input type="date" id="filterDeadline">
+
+        <!-- Add the search button -->
+        <button id="searchButton" onclick="searchTasks()">搜尋</button>
+    </div>
+
+    <script>
+        function containsKeyword(text, keyword) {
+            // 檢查文字中是否包含關鍵字（不區分大小寫）
+            return text.toLowerCase().includes(keyword);
+        }
+
+        var tasks = [];
+
+        function filterTasks() {
+
+            // 使搜尋條件可見
+            document.getElementById('filterCriteria').style.display = 'block';
+
+            // 檢索篩選器值
+            var filterTitle = document.getElementById('filterTitle').value.trim().toLowerCase();
+            var filterPriority = document.getElementById('filterPriority').value.toLowerCase();
+            var filterDeadline = document.getElementById('filterDeadline').value;
+
+            // 關閉其他模態
+            document.getElementById('addTaskModal').style.display = 'none';
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('filterCriteria').style.display = 'block';
+            document.getElementById('modifyTask').style.display = 'none';
+            document.getElementById('deleteTask').style.display = 'none';
+            document.getElementById('homepageImage').style.display = 'none';
+            document.getElementById('tasks').innerHTML = '';
+
+            // 取得任務容器
+            var tasksContainer = document.getElementById('tasks');
+
+            // 刪除現有任務
+            tasksContainer.innerHTML = '';
+        }
+        document.getElementById('searchButton').addEventListener('click', function () {
+            searchTasks();
+        });
+
+        // 定義searchTasks()函式在全局作用域中
+        function searchTasks() {
+            // 取得搜尋條件
+            var filterTitle = document.getElementById('filterTitle').value.trim().toLowerCase();
+            var filterPriority = document.getElementById('filterPriority').value.toLowerCase();
+            var filterDeadline = document.getElementById('filterDeadline').value;
+
+            // 檢查關鍵字欄位是否為空
+            if (filterTitle === '') {
+                // 如果關鍵字欄位為空，提醒用戶填寫關鍵字並退出搜尋
+                alert('請輸入關鍵字進行搜尋');
+                return;
+            }
+
+            // 取得任務容器
+            var tasksContainer = document.getElementById('tasks');
+
+            // 清空任務容器
+            tasksContainer.innerHTML = '';
+
+            // 過濾並顯示符合條件的任務
+            tasks.forEach(function (task) {
+                if (
+                    (filterTitle === '' || containsKeyword(task.title, filterTitle)) &&
+                    (filterPriority === '' || task.priority.toLowerCase() === filterPriority) &&
+                    (filterDeadline === '' || task.deadline === filterDeadline)
+                ) {
+                    displayTaskInContainer(tasksContainer, task);
+                }
+            });
+
+            // 關閉搜尋表單
+            document.getElementById('filterCriteria').style.display = 'none';
+        }
+
+
+
+    </script>
+
+    <!-- 預覽事項的模式 -->
+    <div id="previewModal" style="display: none;">
+        <h2>事項清單</h2>
+        <!-- 整合的排序下拉選單 -->
+        <label for="sortBy">排序：</label>
+        <select id="sortBy" onchange="sortTasks(this.value)">
+            <option value="deadlineDescending">遠到近</option>
+            <option value="deadlineAscending">近到遠</option>
+            </optgroup>
+            <option value="priorityUrgentToNormal">緊急到一般</option>
+            <option value="priorityNormalToUrgent">一般到緊急</option>
+            </optgroup>
+        </select>
+        <table id="tasksTable">
+            <thead>
+                <tr>
+                    <th> </th>
+                    <th>事項名稱</th>
+                    <th>優先級</th>
+                    <th>負責人</th>
+                    <th>描述</th>
+                    <th>截止日期</th>
+                    <th> </th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+
+    <script>
+        function displayPreview() {
+            // Close other modals
+            document.getElementById('filterCriteria').style.display = 'none';
+            document.getElementById('addTaskModal').style.display = 'none';
+            document.getElementById('previewModal').style.display = 'block';
+            document.getElementById('modifyTask').style.display = 'none';
+            document.getElementById('deleteTask').style.display = 'none';
+            document.getElementById('homepageImage').style.display = 'none';
+            document.getElementById('tasks').innerHTML = '';
+
+            // Get the tbody element where tasks will be displayed
+            var tasksTableBody = document.querySelector('#previewModal table tbody');
+            // Clear previous tasks if any
+            tasksTableBody.innerHTML = '';
+
+            // Separate pinned task and unpinned tasks
+            var pinnedTasks = tasks.filter(task => task.pinned);
+            var unpinnedTasks = tasks.filter(task => !task.pinned);
+
+            // Display pinned tasks at the top
+            pinnedTasks.forEach(function (task) {
+                var taskRow = createTaskRow(task);
+                tasksTableBody.appendChild(taskRow);
+            });
+
+            // Display unpinned tasks
+            unpinnedTasks.forEach(function (task) {
+                var taskRow = createTaskRow(task);
+                tasksTableBody.appendChild(taskRow);
+            });
+        }
+
+        function displayTaskInContainer(container, task) {
+            // 建立任務元素
+            var taskElement = document.createElement('div');
+            taskElement.className = 'task';
+
+            // 檢查截止日期是否過期
+            var today = new Date();
+            var deadline = new Date(task.deadline);
+            deadline.setHours(0, 0, 0, 0);
+            if (deadline < today) {
+                taskElement.classList.add('expired'); // 添加過期樣式類
+            }
+
+            // 使用任務詳細資料填入任務元素
+            taskElement.innerHTML = `
+        <strong>${task.title}</strong><br>
+        優先級: ${task.priority}<br>
+        負責人: ${task.assignee}<br>
+        描述: ${task.description}<br>
+        截止日期: ${task.deadline}
+    `;
+
+            // 建立完成按鈕元素
+            var completeButton = document.createElement('button');
+            completeButton.textContent = '完成';
+            completeButton.onclick = function (event) {
+                event.stopPropagation(); // 防止事件冒泡到父元素
+                completeTask(task); // 標記任務為完成狀態
+            };
+
+            // 將完成按鈕添加到任務元素
+            taskElement.appendChild(completeButton);
+
+            // 將任務元素追加到容器中
+            container.appendChild(taskElement);
+        }
+
+
+        function pinTask(title) {
+            // Find the task to pin
+            var pinnedTask = tasks.find(task => task.title === title);
+            pinnedTask.pinned = true; // Mark as pinned
+
+            // Remove the task from its current position
+            tasks.splice(tasks.indexOf(pinnedTask), 1);
+            // Move it to the beginning of the tasks array
+            tasks.unshift(pinnedTask);
+
+            // Re-render the tasks list
+            displayPreview();
+        }
+
+
+        // 創建完成按鈕元素
+        var completeButton = document.createElement('button');
+        completeButton.textContent = '完成';
+        completeButton.onclick = function (event) {
+            event.stopPropagation(); // 防止事件冒泡到父元素
+            completeTask(task); // 標記任務為完成狀態
+        };
+
+        // 添加完成按鈕到任務元素
+        taskElement.appendChild(completeButton);
+
+        function completeTask(task) {
+            // 從任務列表中刪除完成的任務
+            tasks.splice(tasks.indexOf(task), 1);
+
+            // 重新渲染任務列表
+            filterTasks();
+        }
+
+        function sortTasks(option) {
+            // 根據選擇的排序方式進行相應的處理
+            switch (option) {
+                case 'deadlineAscending':
+                    sortTasksByProperty('deadline', true);
+                    break;
+                case 'deadlineDescending':
+                    sortTasksByProperty('deadline', false);
+                    break;
+                case 'priorityUrgentToNormal':
+                    sortTasksByProperty('priority', true);
+                    break;
+                case 'priorityNormalToUrgent':
+                    sortTasksByProperty('priority', false);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function sortTasksByProperty(property, ascending) {
+            // 根據屬性和排序方式進行排序
+            tasks.sort(function (a, b) {
+                if (property === 'deadline') {
+                    var dateA = new Date(a.deadline);
+                    var dateB = new Date(b.deadline);
+                    if (ascending) {
+                        return dateA - dateB;
+                    } else {
+                        return dateB - dateA;
+                    }
+                } else if (property === 'priority') {
+                    if (ascending) {
+                        return priorityToNumber(a.priority) - priorityToNumber(b.priority);
+                    } else {
+                        return priorityToNumber(b.priority) - priorityToNumber(a.priority);
+                    }
+                }
+            });
+
+            // 重新渲染任務列表
+            displayPreview();
+        }
+
+        // 定義優先級轉換成數字的函數
+        function priorityToNumber(priority) {
+            switch (priority) {
+                case '緊急':
+                    return 1;
+                case '中等':
+                    return 2;
+                case '一般':
+                    return 3;
+                default:
+                    return 999; // 其他情況設置一個較大的數字
+            }
+        }
+
+        function createTaskRow(task) {
+            var taskRow = document.createElement('tr');
+
+            // Check if the task is expired
+            var today = new Date();
+            var deadline = new Date(task.deadline);
+            if (deadline < today) {
+                taskRow.classList.add('expired'); // Add expired class to the row
+            }
+
+            taskRow.innerHTML = `
+        <td><button class="pin-button" onclick="pinTask('${task.title}')">釘選</button></td>             
+        <td>${task.title}</td>
+        <td>${task.priority}</td>
+        <td>${task.assignee}</td>
+        <td>${task.description}</td>
+        <td>${task.deadline}</td>
+        <td><button class="button-complete" onclick="completeTask('${task.title}')">完成</button></td>
+
+    `;
+
+            return taskRow;
+        }
+
+
+
+    </script>
+
+
+    <!-- 新增事項的模態 -->
+    <div id="addTaskModal">
+        <h2>新增事項</h2>
+
+        <div class="input-group">
+            <label for="taskTitle">事項名稱:</label>
+            <input type="text" id="taskTitle">
+        </div>
+
+        <div class="input-group">
+            <label for="taskPriority">優先級:</label>
+            <select id="taskPriority">
+                <option value="一般">一般</option>
+                <option value="中等">中等</option>
+                <option value="緊急">緊急</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="taskAssignee">負責人:</label>
+            <input type="text" id="taskAssignee">
+        </div>
+
+        <div class="input-group">
+            <label for="taskDescription">描述:</label>
+            <input type="text" id="taskDescription">
+        </div>
+
+        <div class="input-group">
+            <label for="taskDeadline">截止日期:</label>
+            <input type="date" id="taskDeadline">
+        </div>
+
+        <div class="button-group">
+            <button onclick="addTask()">確定</button>
+            <button onclick="closeAddTaskModal()">取消</button>
+        </div>
+    </div>
+
+    <script>
+        function displayAddTaskModal() {
+            // 關閉其他欄位
+            document.getElementById('filterCriteria').style.display = 'none';
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('addTaskModal').style.display = 'block';
+            document.getElementById('modifyTask').style.display = 'none';
+            document.getElementById('deleteTask').style.display = 'none';
+            document.getElementById('homepageImage').style.display = 'none';
+            document.getElementById('tasks').innerHTML = '';
+        }
+
+        function closeAddTaskModal() {
+            document.getElementById('addTaskModal').style.display = 'none';
+        }
+
+        function addTask() {
+            // 檢索輸入值
+            var title = document.getElementById('taskTitle').value;
+            var priority = document.getElementById('taskPriority').value;
+            var assignee = document.getElementById('taskAssignee').value;
+            var description = document.getElementById('taskDescription').value;
+            var deadline = document.getElementById('taskDeadline').value;
+
+            // 檢查是否有必填字段為空
+            if (!title || !priority || !assignee || !deadline) {
+                alert('請填寫所有必填字段！'); // 提示用戶填寫所有必填字段
+                return; // 中止函式執行
+            }
+
+            // 建立任務對象
+            var task = {
+                title: title,
+                priority: priority,
+                assignee: assignee,
+                description: description,
+                deadline: deadline
+            };
+
+            // 在 addTask 函式中，將新增任務存儲在暫存變數中
+            tasks.push(task);
+
+            // 關閉框框
+            closeAddTaskModal();
+
+            // 清除輸入字段
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskPriority').value = '';
+            document.getElementById('taskAssignee').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('taskDeadline').value = '';
+        }
+
+    </script>
+
+    <!-- 修改事項的模慅 -->
+    <div id="modifyTask" style="display: none;"> <!-- 初始狀態設為隱藏 -->
+        <h2>修改事項</h2>
+        <select id="existingTasks" onchange="displayModifyForm(this.value)">
+            <option value="-1">請選擇要修改的事項</option>
+            <!-- 使用 JavaScript 填充選項 -->
+        </select>
+        <div id="modifyTaskForm" style="display: none;">
+            <div class="input-group">
+                <label for="modifiedTaskTitle">事項名稱:</label>
+                <input type="text" id="modifiedTaskTitle">
+            </div>
+
+            <div class="input-group">
+                <label for="modifiedTaskPriority">優先級:</label>
+                <select id="modifiedTaskPriority">
+                    <option value="緊急">緊急</option>
+                    <option value="中等">中等</option>
+                    <option value="一般">一般</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="modifiedTaskAssignee">負責人:</label>
+                <input type="text" id="modifiedTaskAssignee">
+            </div>
+
+            <div class="input-group">
+                <label for="modifiedTaskDescription">描述:</label>
+                <input type="text" id="modifiedTaskDescription">
+            </div>
+
+            <div class="input-group">
+                <label for="modifiedTaskDeadline">截止日期:</label>
+                <input type="date" id="modifiedTaskDeadline">
+            </div>
+
+            <div class="button-group">
+                <button onclick="updateTask()">更新</button>
+                <button onclick="cancelModify()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var selectedTaskIndex = -1; // 保存選定的任務索引
+
+        // 顯示修改事項的模態
+        function modifyTask() {
+            document.getElementById('addTaskModal').style.display = 'none';
+            document.getElementById('filterCriteria').style.display = 'none';
+            document.getElementById('modifyTask').style.display = 'block';
+            document.getElementById('deleteTask').style.display = 'none';
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('homepageImage').style.display = 'none';
+            document.getElementById('tasks').innerHTML = '';
+
+            var existingTasksSelect = document.getElementById('existingTasks');
+            existingTasksSelect.innerHTML = ''; // 清空下拉選單
+
+            // 填充下拉選單
+            var defaultOption = document.createElement('option');
+            defaultOption.value = '-1';
+            defaultOption.textContent = '請選擇要修改的事項';
+            existingTasksSelect.appendChild(defaultOption);
+
+            tasks.forEach(function (task, index) {
+                var option = document.createElement('option');
+                option.value = index; // 使用索引作為值
+                option.textContent = task.title;
+                existingTasksSelect.appendChild(option);
+            });
+
+            // 顯示修改事項的模態
+            document.getElementById('modifyTask').style.display = 'block';
+        }
+
+        // 顯示修改表單，填入原有任務的詳細信息
+        function displayModifyForm(index) {
+            selectedTaskIndex = index; // 保存選定的任務索引
+            var task = tasks[index];
+            document.getElementById('modifiedTaskTitle').value = task.title;
+            document.getElementById('modifiedTaskPriority').value = task.priority;
+            document.getElementById('modifiedTaskAssignee').value = task.assignee;
+            document.getElementById('modifiedTaskDescription').value = task.description;
+            document.getElementById('modifiedTaskDeadline').value = task.deadline;
+
+            // 隱藏現有任務清單，顯示修改表單
+            document.getElementById('modifyTaskForm').style.display = 'block';
+            document.getElementById('existingTasks').style.display = 'none';
+        }
+
+        // 更新任務
+        function updateTask() {
+            if (selectedTaskIndex !== -1) {
+                // 獲取修改後的任務信息
+                var modifiedTask = {
+                    title: document.getElementById('modifiedTaskTitle').value,
+                    priority: document.getElementById('modifiedTaskPriority').value,
+                    assignee: document.getElementById('modifiedTaskAssignee').value,
+                    description: document.getElementById('modifiedTaskDescription').value,
+                    deadline: document.getElementById('modifiedTaskDeadline').value
+                };
+
+                // 在原有任務位置更新修改後的任務信息
+                tasks[selectedTaskIndex] = modifiedTask;
+
+                // 清空表單
+                document.getElementById('modifiedTaskTitle').value = '';
+                document.getElementById('modifiedTaskPriority').value = '';
+                document.getElementById('modifiedTaskAssignee').value = '';
+                document.getElementById('modifiedTaskDescription').value = '';
+                document.getElementById('modifiedTaskDeadline').value = '';
+
+                // 重設選定的任務索引
+                selectedTaskIndex = -1;
+                // 隱藏修改表單，顯示現有任務清單
+                document.getElementById('modifyTaskForm').style.display = 'none';
+                document.getElementById('existingTasks').style.display = 'block';
+
+                resetModifyForm();
+            }
+        }
+
+        function cancelModify() {
+            // 提示用戶是否確定取消修改
+            var confirmed = confirm('確定要取消修改事項嗎？');
+            if (confirmed) {
+                // 重置修改表單並隱藏
+                document.getElementById('modifyTaskForm').style.display = 'none';
+                document.getElementById('existingTasks').style.display = 'block';
+
+                resetModifyForm();
+            }
+        }
+
+        function resetModifyForm() {
+            // 重置下拉選單到預設選項
+            document.getElementById('existingTasks').value = '-1';
+        }
+
+    </script>
+
+    <!-- 刪除事項的模式 -->
+    <div id="deleteTask" style="display: none;">
+        <h2>刪除事項</h2>
+        <select id="deleteTaskList" onchange="displayDeleteConfirmation(this.value)">
+            <option value="-1">請選擇要刪除的事項</option>
+            <!-- 使用 JavaScript 填充選項 -->
+        </select>
+    </div>
+
+    <script>
+        function deleteTask() {
+            // 關閉其他模態
+            document.getElementById('addTaskModal').style.display = 'none';
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('filterCriteria').style.display = 'none';
+            document.getElementById('modifyTask').style.display = 'none'; // 隱藏修改事項模式
+            document.getElementById('homepageImage').style.display = 'none';
+            document.getElementById('tasks').innerHTML = '';
+
+            // 顯示刪除事項的模式
+            document.getElementById('deleteTask').style.display = 'block';
+            var deleteTaskList = document.getElementById('deleteTaskList');
+            deleteTaskList.innerHTML = ''; // 清空列表
+
+            // 添加 "請選擇要刪除的事項" 選項
+            var defaultOption = document.createElement('option');
+            defaultOption.value = '-1';
+            defaultOption.textContent = '請選擇要刪除的事項';
+            deleteTaskList.appendChild(defaultOption);
+
+            // 填充已有的事項
+            tasks.forEach(function (task, index) {
+                var option = document.createElement('option');
+                option.value = index;
+                option.textContent = task.title;
+                deleteTaskList.appendChild(option);
+            });
+        }
+
+
+
+        // 顯示刪除確認框
+        function displayDeleteConfirmation(index) {
+            if (index !== '-1') {
+                var confirmed = confirm('確定要刪除此事項嗎？');
+                if (confirmed) {
+                    tasks.splice(index, 1); // 從任務列表中刪除選定的任務
+                    filterTasks(); // 重新顯示任務列表
+                    alert('已成功刪除事項！');
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>

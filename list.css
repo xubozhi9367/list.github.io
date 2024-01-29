@@ -1,0 +1,280 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #9ee7fd;
+}
+
+#todoList {
+    width: 97.4%;
+    height: 50px;
+    margin-top: 0px;
+    background-color: #334288;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 10);
+    padding: 20px;
+}
+
+h1 {
+    font-size: 24px;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+    margin-left: -1200px;
+    margin-top: -20px;
+}
+
+
+button {
+    padding: 10px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background-color: #3498db00;
+    border-bottom: 2px solid transparent;
+    /* 添加底部的底線 */
+    color: #fff;
+    border-radius: 100px;
+    margin-right: 10px;
+    /* 右側間距 */
+    margin-bottom: 10px;
+    /* 底部間距 */
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    border-bottom-color: #000;
+    /* 滑鼠懸停時改變底線顏色 */
+}
+
+.fixed-buttons-container {
+    position: fixed;
+    top: 20px;
+    /* 距離屏幕頂部的距離 */
+    right: 20px;
+    /* 距離屏幕右側的距離 */
+    z-index: 1000;
+    /* 確保在最上層 */
+}
+
+.buttons-container {
+    display: flex;
+}
+
+
+.task {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #f3f3f3;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #cecece;
+    z-index: 1000;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input,
+select {
+    width: calc(100% - 20px);
+    padding: 8px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+}
+
+/*搜尋*/
+#filterCriteria {
+    display: none;
+    margin-top: 20px;
+    /* 調整為你想要的值 */
+}
+
+
+#searchButton {
+    background-color: #fb9393e1;
+}
+
+#deleteButton {
+    background-color: #fb9393e1;
+}
+
+.button-group button:first-child {
+    background-color: #27ae60;
+}
+
+.button-group button:first-child:hover {
+    background-color: #218c54;
+}
+
+.button-group button:last-child {
+    background-color: #e74c3c;
+}
+
+.button-group button:last-child:hover {
+    background-color: #c0392b;
+}
+
+.button-group button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    color: #fff;
+    border-radius: 5px;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.button-group button:hover {
+    filter: brightness(0.9);
+}
+
+.task.expired {
+    background-color: #ffcccc;
+    position: relative;
+    /* 添加相對定位 */
+    margin-top: 20px;
+    /* 距離頂部的距離，根據你的需要調整 */
+}
+
+.task-container {
+    margin-top: 30px;
+}
+
+
+#tasksTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#tasksTable th,
+#tasksTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#tasksTable th {
+    background-color: #f2f2f2;
+}
+
+#tasksTable tbody tr {
+    background-color: #f9f9f9;
+}
+
+#tasksTable tbody tr:hover {
+    background-color: #f2f2f2;
+}
+
+/*過期*/
+.expired {
+    color: red;
+    /* 將文字顏色設置為紅色 */
+}
+
+/* 在css中選擇li元素，並添加hover效果 */
+#deleteTaskList li:hover {
+    cursor: pointer;
+    background-color: #f2f2f2;
+    /* 當滑鼠懸停時改變背景色 */
+}
+
+/* 在css中選擇已選擇的任務，並添加樣式 */
+#deleteTaskList .selected {
+    background-color: #ffcccc;
+    /* 將背景色設置為淡紅色 */
+}
+
+/*預覽排序*/
+#sortBy {
+    width: 500px;
+    /* 设置宽度为200像素，你可以根据需要调整这个值 */
+}
+
+#modifyTask {
+    display: none;
+    width: 300px;
+    /* 增加寬度 */
+    height: 300px;
+    /* 增加高度 */
+    /* 其他樣式 */
+}
+
+#deleteTask {
+    display: none;
+    width: 300px;
+    /* 增加寬度 */
+    height: 300px;
+    /* 增加高度 */
+    /* 其他樣式 */
+}
+
+/*釘選*/
+.pin-button {
+    margin: 10px 20px;
+    /* 10px下方距離，20px右方距離 */
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pin-button:hover {
+    background-color: #2980b9;
+}
+
+/*完成*/
+.button-complete {
+    margin: 10px 20px;
+    /* 10px下方距離，20px右方距離 */
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background-color: #6b6b6b75;
+    /* 背景顏色 */
+    color: #000000;
+    /* 文字顏色 */
+    border-radius: 4px;
+    /* 圓角 */
+    transition: background-color 0.3s ease;
+    /* 平滑過渡 */
+}
+
+.button-complete:hover {
+    background-color: #2980b9;
+    /* 滑鼠懸停時的背景顏色 */
+}
